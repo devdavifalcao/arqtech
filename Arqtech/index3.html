@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Painel Admin - ArqTech</title>
+  <link rel="stylesheet" href="style3.css" />
+</head>
+<body>
+  <h1>Editar Nossos Projetos</h1>
+
+  
+  <div class="project-block">
+    <h2>Projeto 1</h2>
+    <label for="title1">Título:</label>
+    <input type="text" id="title1">
+  
+    <label for="desc1">Descrição:</label>
+    <textarea id="desc1" rows="4"></textarea>
+  
+    <label for="img1">Upload da imagem:</label>
+    <input type="file" id="img1" accept="image/*">
+  
+    <button onclick="saveProject(1)">Salvar Projeto 1</button>
+    <button onclick="resetProject(1)">Resetar Projeto 1</button>
+  </div>
+  
+ 
+  <div class="project-block">
+    <h2>Projeto 2</h2>
+    <label for="title2">Título:</label>
+    <input type="text" id="title2">
+  
+    <label for="desc2">Descrição:</label>
+    <textarea id="desc2" rows="4"></textarea>
+  
+    <label for="img2">Upload da imagem:</label>
+    <input type="file" id="img2" accept="image/*">
+  
+    <button onclick="saveProject(2)">Salvar Projeto 2</button>
+    <button onclick="resetProject(2)">Resetar Projeto 2</button>
+  </div>
+  
+  
+  <div class="project-block">
+    <h2>Projeto 3</h2>
+    <label for="title3">Título:</label>
+    <input type="text" id="title3">
+  
+    <label for="desc3">Descrição:</label>
+    <textarea id="desc3" rows="4"></textarea>
+  
+    <label for="img3">Upload da imagem:</label>
+    <input type="file" id="img3" accept="image/*">
+  
+    <button onclick="saveProject(3)">Salvar Projeto 3</button>
+    <button onclick="resetProject(3)">Resetar Projeto 3</button>
+  </div>
+  
+  <h1>Gerenciar Imagens do Carrossel</h1>
+
+  <label for="imageInput" class="custom-upload-button" id="uploadLabel">
+    Escolher Imagem
+    <span id="fileName" class="empty" style="margin-left:10px;">Nenhum arquivo selecionado</span>
+  </label>
+  <input type="file" id="imageInput" accept="image/png, image/jpeg" style="display:none" />
+
+  <button id="addImageBtn" type="button" disabled>Adicionar Imagem</button>
+  <button id="resetCarouselBtn" type="button">Resetar Carrossel</button>
+
+  <ul id="imageList"></ul>
+
+  
+  <div class="back-button-container">
+    <a href="index.html" class="back-button">← Voltar à Área Principal</a>
+  </div>
+
+  <script src="main3.js"></script>
+</body>
+</html>
