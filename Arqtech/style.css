@@ -475,3 +475,51 @@ main {
   line-height: 1.4;
 }
 }
+
+/* Ajustes do menu mobile e do carrossel */
+@media (max-width: 768px) {
+  .mobile-menu:not(.hidden) {
+    display: flex;
+  }
+
+  .mobile-menu {
+    position: absolute;
+    top: 100%;
+    left: 15px;
+    right: 15px;
+    width: auto;
+  }
+
+  .carousel-wrapper {
+    padding: 0 15px;
+  }
+
+  .carousel-container {
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .carousel-slide {
+    display: flex;
+    transition: transform 0.4s ease-in-out;
+  }
+
+  .carousel-slide img {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+  }
+
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+  }
+
+  .carousel-btn.prev { left: 10px; }
+  .carousel-btn.next { right: 10px; }
+}
