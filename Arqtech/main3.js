@@ -1,111 +1,171 @@
+function readStoredImages() {
+  try {
+    const images = JSON.parse(localStorage.getItem("carouselImages") || "[]");
+    return Array.isArray(images) ? images : [];
+  } catch {
+    return [];
+  }
+}
+
 function saveProject(n) {
-  const title = document.getElementById(`title${n}`).value.trim();
-  const desc = document.getElementById(`desc${n}`).value.trim();
+  const titleInput = document.getElementById(`title${n}`);
+  const descInput = document.getElementById(`desc${n}`);
   const fileInput = document.getElementById(`img${n}`);
+
+  if (!titleInput || !descInput || !fileInput) return;
+
+  const title = titleInput.value.trim();
+  const desc = descInput.value.trim();
   const file = fileInput.files[0];
 
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function () {
-      const imgData = reader.result;
-      localStorage.setItem(`project${n}-img`, imgData);
+  function saveData(imageData) {
+    try {
       localStorage.setItem(`project${n}-title`, title);
       localStorage.setItem(`project${n}-desc`, desc);
+      if (imageData) localStorage.setItem(`project${n}-img`, imageData);
       alert(`Projeto ${n} salvo com sucesso!`);
-    };
-    reader.readAsDataURL(file);
-  } else {
-    
-    localStorage.setItem(`project${n}-title`, title);
-    localStorage.setItem(`project${n}-desc`, desc);
-    alert(`Projeto ${n} salvo (sem nova imagem).`);
+    } catch (error) {
+      alert("Não foi possível salvar. A imagem pode ser muito grande para o armazenamento do navegador.");
+    }
   }
+
+  if (!file) {
+    saveData(null);
+    return;
+  }
+
+  if (!file.type.startsWith("image/")) {
+    alert("Selecione um arquivo de imagem válido.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => saveData(reader.result);
+  reader.onerror = () => alert("Não foi possível ler a imagem selecionada.");
+  reader.readAsDataURL(file);
 }
 
 function resetProject(n) {
+  if (!confirm(`Deseja resetar o Projeto ${n}? `)) return;
+
   localStorage.removeItem(`project${n}-title`);
   localStorage.removeItem(`project${n}-desc`);
   localStorage.removeItem(`project${n}-img`);
-  alert(`Projeto ${n} resetado!`);
+
+  const title = document.getElementById(`title${n}`);
+  const desc = document.getElementById(`desc${n}`);
+  const image = document.getElementById(`img${n}`);
+
+  if (title) title.value = "";
+  if (desc) desc.value = "";
+  if (image) image.value = "";
+
+  alert(`Projeto ${n} resetado. Atualize a página principal para ver a versão original.`);
 }
 
-const imageInput = document.getElementById('imageInput');
-const addImageBtn = document.getElementById('addImageBtn');
-const resetBtn = document.getElementById('resetCarouselBtn');
-const imageList = document.getElementById('imageList');
-const fileNameSpan = document.getElementById('fileName');
+document.addEventListener("DOMContentLoaded", () => {
+  const imageInput = document.getElementById("imageInput");
+  const addImageBtn = document.getElementById("addImageBtn");
+  const resetBtn = document.getElementById("resetCarouselBtn");
+  const imageList = document.getElementById("imageList");
+  const fileNameSpan = document.getElementById("fileName");
 
-let currentImageData = null;
+  if (!imageInput || !addImageBtn || !resetBtn || !imageList || !fileNameSpan) return;
 
-function updateImageList() {
-  const stored = JSON.parse(localStorage.getItem('carouselImages') || '[]');
-  imageList.innerHTML = '';
+  let currentImageData = null;
 
-  stored.forEach((imgSrc, index) => {
-    const li = document.createElement('li');
-    const img = document.createElement('img');
-    img.src = imgSrc;
-    img.style.width = '100px';
-    img.style.height = 'auto';
-    img.alt = `Imagem ${index + 1}`;
+  function updateImageList() {
+    const stored = readStoredImages();
+    imageList.replaceChildren();
 
-    const btnRemove = document.createElement('button');
-    btnRemove.textContent = 'Remover';
-    btnRemove.classList.add('remove-btn');
-    btnRemove.addEventListener('click', () => {
-      stored.splice(index, 1);
-      localStorage.setItem('carouselImages', JSON.stringify(stored));
-      updateImageList();
+    stored.forEach((imgSrc, index) => {
+      const li = document.createElement("li");
+      const img = document.createElement("img");
+      img.src = imgSrc;
+      img.style.width = "100px";
+      img.style.height = "auto";
+      img.alt = `Imagem ${index + 1} do carrossel`;
+
+      const btnRemove = document.createElement("button");
+      btnRemove.type = "button";
+      btnRemove.textContent = "Remover";
+      btnRemove.classList.add("remove-btn");
+      btnRemove.addEventListener("click", () => {
+        const updated = readStoredImages();
+        updated.splice(index, 1);
+        try {
+          localStorage.setItem("carouselImages", JSON.stringify(updated));
+          updateImageList();
+        } catch {
+          alert("Não foi possível atualizar o carrossel.");
+        }
+      });
+
+      li.append(img, btnRemove);
+      imageList.appendChild(li);
     });
+  }
 
-    li.appendChild(img);
-    li.appendChild(btnRemove);
-    imageList.appendChild(li);
-  });
-}
+  imageInput.addEventListener("change", () => {
+    const file = imageInput.files[0];
+    addImageBtn.disabled = !file;
+    currentImageData = null;
 
-imageInput.addEventListener('change', () => {
-  const file = imageInput.files[0];
-  addImageBtn.disabled = !file;
+    if (!file) {
+      fileNameSpan.textContent = "Nenhum arquivo selecionado";
+      fileNameSpan.classList.add("empty");
+      return;
+    }
 
-  if (file) {
+    if (!file.type.startsWith("image/")) {
+      alert("Selecione um arquivo de imagem válido.");
+      imageInput.value = "";
+      addImageBtn.disabled = true;
+      fileNameSpan.textContent = "Nenhum arquivo selecionado";
+      fileNameSpan.classList.add("empty");
+      return;
+    }
+
     fileNameSpan.textContent = file.name;
-    fileNameSpan.classList.remove('empty');
+    fileNameSpan.classList.remove("empty");
 
     const reader = new FileReader();
-    reader.onload = function (e) {
-      currentImageData = e.target.result;
+    reader.onload = event => {
+      currentImageData = event.target.result;
+      addImageBtn.disabled = !currentImageData;
+    };
+    reader.onerror = () => {
+      alert("Não foi possível ler a imagem.");
+      addImageBtn.disabled = true;
     };
     reader.readAsDataURL(file);
-  } else {
-    fileNameSpan.textContent = 'Nenhum arquivo selecionado';
-    fileNameSpan.classList.add('empty');
-    currentImageData = null;
-  }
-});
+  });
 
-addImageBtn.addEventListener('click', () => {
-  if (!currentImageData) return;
+  addImageBtn.addEventListener("click", () => {
+    if (!currentImageData) return;
 
-  const stored = JSON.parse(localStorage.getItem('carouselImages') || '[]');
-  stored.push(currentImageData);
-  localStorage.setItem('carouselImages', JSON.stringify(stored));
+    const stored = readStoredImages();
+    stored.push(currentImageData);
 
-  alert('Imagem salva para o carrossel!');
-  imageInput.value = '';
-  fileNameSpan.textContent = 'Nenhum arquivo selecionado';
-  fileNameSpan.classList.add('empty');
-  addImageBtn.disabled = true;
-  currentImageData = null;
+    try {
+      localStorage.setItem("carouselImages", JSON.stringify(stored));
+      alert("Imagem adicionada ao carrossel!");
+      imageInput.value = "";
+      fileNameSpan.textContent = "Nenhum arquivo selecionado";
+      fileNameSpan.classList.add("empty");
+      addImageBtn.disabled = true;
+      currentImageData = null;
+      updateImageList();
+    } catch {
+      alert("Não foi possível salvar. A imagem pode ser muito grande para o armazenamento do navegador.");
+    }
+  });
+
+  resetBtn.addEventListener("click", () => {
+    if (!confirm("Deseja realmente resetar o carrossel? Todas as imagens serão removidas.")) return;
+    localStorage.removeItem("carouselImages");
+    updateImageList();
+  });
 
   updateImageList();
 });
-
-resetBtn.addEventListener('click', () => {
-  if (confirm('Deseja realmente resetar o carrossel? Todas as imagens serão removidas.')) {
-    localStorage.removeItem('carouselImages');
-    updateImageList();
-  }
-});
-
-updateImageList();
